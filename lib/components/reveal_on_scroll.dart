@@ -26,28 +26,21 @@ class _RevealOnScrollState extends State<RevealOnScroll>
   late final AnimationController _controller;
   late final Animation<double> _opacity;
   late final Animation<Offset> _slide;
+  late final Key _visibilityKey;
   bool _hasAnimated = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _visibilityKey = UniqueKey();
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    _opacity = CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    );
+    _opacity = CurvedAnimation(parent: _controller, curve: widget.curve);
 
     _slide = Tween<Offset>(
       begin: Offset(0, widget.offsetY),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: widget.curve,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: widget.curve));
   }
 
   @override
@@ -57,7 +50,7 @@ class _RevealOnScrollState extends State<RevealOnScroll>
   }
 
   void _onVisibilityChanged(VisibilityInfo info) {
-    if (!_hasAnimated && info.visibleFraction > 0.15) {
+    if (!_hasAnimated && info.visibleFraction > 0.05) {
       _hasAnimated = true;
       Future.delayed(widget.delay, () {
         if (mounted) _controller.forward();
@@ -68,17 +61,14 @@ class _RevealOnScrollState extends State<RevealOnScroll>
   @override
   Widget build(BuildContext context) {
     return VisibilityDetector(
-      key: Key('reveal-${widget.hashCode}'),
+      key: _visibilityKey,
       onVisibilityChanged: _onVisibilityChanged,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
           return Transform.translate(
             offset: _slide.value,
-            child: Opacity(
-              opacity: _opacity.value,
-              child: child,
-            ),
+            child: Opacity(opacity: _opacity.value, child: child),
           );
         },
         child: widget.child,
