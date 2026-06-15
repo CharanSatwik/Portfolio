@@ -93,17 +93,28 @@ class _UnderlinePainter extends CustomPainter {
     
     path.moveTo(0, y);
     
-    // Draw an irregular line
+    // Draw an irregular line up to the current progress
+    final targetX = size.width * progress;
     for (double i = 1; i <= 20; i++) {
       final x = (size.width / 20) * i;
-      final dy = math.sin(i * 0.5) * 1.5;
-      path.lineTo(x, y + dy);
+      if (x <= targetX) {
+        final dy = math.sin(i * 0.5) * 1.5;
+        path.lineTo(x, y + dy);
+      } else {
+        final prevX = (size.width / 20) * (i - 1);
+        final prevDy = math.sin((i - 1) * 0.5) * 1.5;
+        final nextDy = math.sin(i * 0.5) * 1.5;
+        
+        if (x > prevX) {
+          final fraction = (targetX - prevX) / (x - prevX);
+          final interpolatedDy = prevDy + (nextDy - prevDy) * fraction;
+          path.lineTo(targetX, y + interpolatedDy);
+        }
+        break;
+      }
     }
 
-    final pathMetrics = path.computeMetrics().first;
-    final extractPath = pathMetrics.extractPath(0, pathMetrics.length * progress);
-    
-    canvas.drawPath(extractPath, paint);
+    canvas.drawPath(path, paint);
   }
 
   @override

@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            'Vuppala Charan Satwik.',
+            'Vuppala Charan Satwik',
             style: theme.textTheme.displayMedium,
           ),
         ),
